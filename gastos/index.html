@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Finanzas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar__inner">
+            <h1 class="brand">Mis Finanzas</h1>
+            <div class="month-nav">
+                <button type="button" class="icon-btn" id="prevMonth" aria-label="Mes anterior">‹</button>
+                <span id="monthLabel" class="month-label"></span>
+                <button type="button" class="icon-btn" id="nextMonth" aria-label="Mes siguiente">›</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Resumen -->
+        <section class="summary" aria-label="Resumen del mes">
+            <article class="card stat">
+                <span class="stat__label">Ingresos</span>
+                <strong class="stat__value positive" id="totalIngresos">0</strong>
+                <span class="stat__hint" id="detalleIngresos"></span>
+            </article>
+            <article class="card stat">
+                <span class="stat__label">Gastos</span>
+                <strong class="stat__value negative" id="totalGastos">0</strong>
+                <span class="stat__hint" id="detalleGastos"></span>
+            </article>
+            <article class="card stat">
+                <span class="stat__label">Balance</span>
+                <strong class="stat__value" id="balance">0</strong>
+                <span class="stat__hint" id="detalleBalance"></span>
+            </article>
+        </section>
+
+        <section class="card progress-card" aria-label="Porcentaje gastado">
+            <div class="progress-card__head">
+                <span>Has gastado <strong id="pctGastado">0%</strong> de tus ingresos</span>
+                <span class="muted" id="disponible"></span>
+            </div>
+            <div class="progress"><div class="progress__bar" id="progressBar"></div></div>
+        </section>
+
+        <div class="grid">
+            <!-- Formulario -->
+            <section class="card">
+                <div class="tabs" role="tablist">
+                    <button type="button" class="tab active" data-tipo="gasto" role="tab">Nuevo gasto</button>
+                    <button type="button" class="tab" data-tipo="ingreso" role="tab">Nuevo ingreso</button>
+                </div>
+
+                <form id="form" class="form" autocomplete="off">
+                    <input type="hidden" id="editId">
+                    <label class="field">
+                        <span>Monto</span>
+                        <input type="number" id="monto" min="0.01" step="0.01" inputmode="decimal" required placeholder="0.00">
+                    </label>
+                    <label class="field">
+                        <span>Categoría</span>
+                        <select id="categoria" required></select>
+                    </label>
+                    <label class="field">
+                        <span>Descripción</span>
+                        <input type="text" id="descripcion" maxlength="80" placeholder="Ej. Supermercado, alquiler…">
+                    </label>
+                    <label class="field">
+                        <span>Fecha</span>
+                        <input type="date" id="fecha" required>
+                    </label>
+                    <label class="check">
+                        <input type="checkbox" id="fijo">
+                        <span>Es fijo (se repite cada mes)</span>
+                    </label>
+                    <div class="form__actions">
+                        <button type="submit" class="btn btn--primary" id="submitBtn">Agregar gasto</button>
+                        <button type="button" class="btn btn--ghost hidden" id="cancelEdit">Cancelar</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Categorías -->
+            <section class="card">
+                <h2 class="card__title">Gastos por categoría</h2>
+                <ul class="cat-list" id="catList"></ul>
+                <p class="empty" id="catEmpty">Aún no hay gastos este mes.</p>
+            </section>
+        </div>
+
+        <!-- Movimientos -->
+        <section class="card">
+            <div class="list-head">
+                <h2 class="card__title">Movimientos</h2>
+                <div class="filters">
+                    <select id="filtroTipo" aria-label="Filtrar por tipo">
+                        <option value="todos">Todos</option>
+                        <option value="ingreso">Ingresos</option>
+                        <option value="gasto">Gastos</option>
+                    </select>
+                    <input type="search" id="buscar" placeholder="Buscar…" aria-label="Buscar">
+                </div>
+            </div>
+            <div class="fixed-banner hidden" id="fixedBanner">
+                <span id="fixedBannerText"></span>
+                <button type="button" class="btn btn--small" id="copyFixed">Agregar fijos</button>
+            </div>
+            <ul class="tx-list" id="txList"></ul>
+            <p class="empty" id="txEmpty">No hay movimientos en este mes.</p>
+        </section>
+
+        <!-- Historial -->
+        <section class="card">
+            <h2 class="card__title">Últimos 6 meses</h2>
+            <div class="history" id="history"></div>
+            <div class="legend">
+                <span><i class="dot dot--in"></i>Ingresos</span>
+                <span><i class="dot dot--out"></i>Gastos</span>
+            </div>
+        </section>
+
+        <!-- Ajustes -->
+        <section class="card">
+            <h2 class="card__title">Ajustes y datos</h2>
+            <div class="settings">
+                <label class="field field--inline">
+                    <span>Moneda</span>
+                    <select id="moneda">
+                        <option value="EUR">Euro (€)</option>
+                        <option value="USD">Dólar (US$)</option>
+                        <option value="MXN">Peso mexicano</option>
+                        <option value="COP">Peso colombiano</option>
+                        <option value="ARS">Peso argentino</option>
+                        <option value="CLP">Peso chileno</option>
+                        <option value="PEN">Sol peruano</option>
+                        <option value="DOP">Peso dominicano</option>
+                        <option value="VES">Bolívar</option>
+                        <option value="GTQ">Quetzal</option>
+                    </select>
+                </label>
+                <div class="settings__buttons">
+                    <button type="button" class="btn btn--ghost" id="exportCsv">Exportar CSV</button>
+                    <button type="button" class="btn btn--ghost" id="exportJson">Copia de seguridad</button>
+                    <label class="btn btn--ghost">
+                        Restaurar copia
+                        <input type="file" id="importJson" accept="application/json" hidden>
+                    </label>
+                    <button type="button" class="btn btn--danger" id="resetAll">Borrar todo</button>
+                </div>
+            </div>
+            <p class="muted small">Tus datos se guardan solo en este navegador. Haz copias de seguridad de vez en cuando.</p>
+        </section>
+    </main>
+
+    <div class="modal hidden" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmText">
+        <div class="modal__box">
+            <p id="confirmText"></p>
+            <div class="modal__actions">
+                <button type="button" class="btn btn--ghost" id="confirmCancel">Cancelar</button>
+                <button type="button" class="btn btn--danger-solid" id="confirmOk">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

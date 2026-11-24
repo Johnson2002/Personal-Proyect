@@ -256,6 +256,30 @@ button, input, select { font: inherit; color: inherit; }
 .settings { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .settings__buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* Modal de confirmación */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    z-index: 50;
+}
+.modal__box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+.modal__box p { margin-bottom: 16px; overflow-wrap: anywhere; }
+.modal__actions { display: flex; justify-content: flex-end; gap: 8px; }
+.btn--danger-solid { background: var(--negative); color: #fff; }
+.btn--danger-solid:hover { filter: brightness(1.08); }
+
 /* Toast */
 .toast {
     position: fixed;

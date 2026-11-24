@@ -113,6 +113,35 @@
         return t.tipo + '|' + t.categoria + '|' + (t.descripcion || '').trim().toLowerCase();
     }
 
+    // Confirmación propia (los diálogos del navegador pueden estar bloqueados)
+    function confirmar(mensaje, textoOk) {
+        return new Promise((resolve) => {
+            const modal = $('confirmModal');
+            const ok = $('confirmOk');
+            const cancel = $('confirmCancel');
+            $('confirmText').textContent = mensaje;
+            ok.textContent = textoOk || 'Aceptar';
+            modal.classList.remove('hidden');
+            ok.focus();
+            const cerrar = (valor) => {
+                modal.classList.add('hidden');
+                ok.removeEventListener('click', onOk);
+                cancel.removeEventListener('click', onCancel);
+                modal.removeEventListener('click', onFondo);
+                document.removeEventListener('keydown', onKey);
+                resolve(valor);
+            };
+            const onOk = () => cerrar(true);
+            const onCancel = () => cerrar(false);
+            const onFondo = (e) => { if (e.target === modal) cerrar(false); };
+            const onKey = (e) => { if (e.key === 'Escape') cerrar(false); };
+            ok.addEventListener('click', onOk);
+            cancel.addEventListener('click', onCancel);
+            modal.addEventListener('click', onFondo);
+            document.addEventListener('keydown', onKey);
+        });
+    }
+
     let toastTimer;
     function toast(msg) {
         const el = $('toast');
@@ -215,11 +244,11 @@
         $('monto').focus({ preventScroll: true });
     }
 
-    function eliminar(id) {
+    async function eliminar(id) {
         const t = state.movimientos.find((x) => x.id === id);
         if (!t) return;
         const nombre = t.descripcion || buscarCategoria(t.tipo, t.categoria).nombre;
-        if (!confirm('¿Eliminar "' + nombre + '" (' + formatoMoneda(t.monto) + ')?')) return;
+        if (!(await confirmar('¿Eliminar "' + nombre + '" (' + formatoMoneda(t.monto) + ')?', 'Eliminar'))) return;
         state.movimientos = state.movimientos.filter((x) => x.id !== id);
         if ($('editId').value === id) limpiarForm();
         guardar();
@@ -504,7 +533,7 @@
 
     function importarJSON(file) {
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
             try {
                 const data = JSON.parse(reader.result);
                 if (!data || !Array.isArray(data.movimientos)) throw new Error('formato');
@@ -522,7 +551,7 @@
                     fecha: t.fecha,
                     fijo: !!t.fijo
                 }));
-                if (!confirm('Se reemplazarán tus datos actuales por ' + validos.length + ' movimientos de la copia. ¿Continuar?')) return;
+                if (!(await confirmar('Se reemplazarán tus datos actuales por ' + validos.length + ' movimientos de la copia. ¿Continuar?', 'Restaurar'))) return;
                 state = { moneda: typeof data.moneda === 'string' ? data.moneda : state.moneda, movimientos: validos };
                 $('moneda').value = state.moneda;
                 guardar();
@@ -565,9 +594,9 @@
             if (e.target.files[0]) importarJSON(e.target.files[0]);
             e.target.value = '';
         });
-        $('resetAll').addEventListener('click', () => {
+        $('resetAll').addEventListener('click', async () => {
             if (!state.movimientos.length) { toast('No hay datos que borrar.'); return; }
-            if (!confirm('¿Seguro que quieres borrar TODOS tus movimientos? Esta acción no se puede deshacer.')) return;
+            if (!(await confirmar('¿Seguro que quieres borrar TODOS tus movimientos? Esta acción no se puede deshacer.', 'Borrar todo'))) return;
             state.movimientos = [];
             guardar();
             limpiarForm();

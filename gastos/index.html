@@ -157,6 +157,16 @@
         </section>
     </main>
 
+    <div class="modal hidden" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmText">
+        <div class="modal__box">
+            <p id="confirmText"></p>
+            <div class="modal__actions">
+                <button type="button" class="btn btn--ghost" id="confirmCancel">Cancelar</button>
+                <button type="button" class="btn btn--danger-solid" id="confirmOk">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
